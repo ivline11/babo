@@ -4,18 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>그어만: 그래서 어디서 만나?</title>
-<meta name="description" content="출발역과 약속 시간만 넣으면, 그 시간에 덜 붐비고 모두 오기 편한 곳을 골라드려요.">
+<meta name="description" content="조건만 넣으면 약속 장소를 딱 정해드려요. 출발역, 시간, 뭐 할지를 넣으면 모두 오기 편한 수도권 지역 3곳을 골라드려요.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="그어만">
-<meta property="og:description" content="출발역과 약속 시간만 넣으면, 그 시간에 덜 붐비고 모두 오기 편한 곳을 골라드려요.">
+<meta property="og:title" content="그어만 — 약속 장소 고민 끝">
+<meta property="og:description" content="조건만 넣으면 약속 장소를 딱 정해드려요. 출발역, 시간, 뭐 할지를 넣으면 모두 오기 편한 수도권 지역 3곳을 골라드려요.">
 <meta property="og:image" content="https://geueoman.netlify.app/og.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link href="https://cdn.jsdelivr.net/npm/busy-load/dist/app.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/gh/dinoqqq/simple-popup@master/dist/jquery.simple-popup.min.css" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-latest.min.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/busy-load/dist/app.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/dinoqqq/simple-popup@master/dist/jquery.simple-popup.min.js"></script>
 <style>
 :root {
   --bg:#0B0C10; --surface:#13141C; --card:#1C1D28;
@@ -45,10 +43,6 @@ a{color:inherit;text-decoration:none}
 
 /* ── Hero ── */
 .hero{padding:52px 0 32px;position:relative}
-.hero::before{content:'';position:absolute;top:-80px;left:0;right:0;
-  height:500px;
-  background:radial-gradient(ellipse at center,rgba(79,142,247,.07) 0%,transparent 68%);
-  pointer-events:none}
 .live-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;
   background:rgba(0,196,111,.1);border:1px solid rgba(0,196,111,.25);
   border-radius:999px;font-size:12px;font-weight:700;color:var(--lv1);margin-bottom:20px}
@@ -105,7 +99,7 @@ select:focus{outline:none;border-color:var(--accent)}
 .st{width:100%;height:46px;padding:0 12px;font:inherit;font-size:16px;color:var(--text);background:var(--surface);border:1px solid var(--border-hi);border-radius:10px}
 .st:focus{outline:none;border-color:var(--accent)}
 .st.bad{border-color:var(--lv4)}
-.sug{position:absolute;z-index:6;left:0;right:0;top:50px;margin:0;padding:4px 0;list-style:none;background:var(--card);border:1px solid var(--border-hi);border-radius:10px;box-shadow:0 10px 26px rgba(0,0,0,.45);max-height:260px;overflow-y:auto}
+.sug{position:absolute;z-index:6;left:0;right:0;top:50px;margin:0;padding:4px 0;list-style:none;background:var(--card);border:1px solid var(--border-hi);border-radius:10px;box-shadow:0 10px 26px rgba(0,0,0,.45);max-height:320px;overflow-y:auto}
 .sug button{display:flex;align-items:center;gap:6px;width:100%;padding:10px 12px;text-align:left;background:none;border:0;font:inherit;font-size:15px;color:var(--text);cursor:pointer}
 .sug button:hover,.sug button:focus{background:var(--surface)}
 .sug-line-hdr{display:flex;align-items:center;gap:7px;padding:8px 12px 5px;font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.04em;border-top:1px solid var(--border);margin-top:2px;pointer-events:none}
@@ -259,9 +253,46 @@ textarea{min-height:88px;resize:vertical}
 
 footer{padding:40px 0 60px;font-size:12px;color:#A3AAC2;line-height:1.8}
 footer p{margin:0 0 3px}
-#popup{color:var(--text)}
-#popup h1{font-size:22px;font-weight:800;margin:0 0 6px;letter-spacing:-.03em}
-#popup p{color:var(--sub);font-size:14px;margin:0;line-height:1.65}
+
+/* ── 모달 ── */
+.modal-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.7);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-overlay[hidden]{display:none!important}
+.modal-box{background:var(--card);border:1px solid var(--border-hi);border-radius:20px;
+  padding:32px 24px 28px;max-width:340px;width:100%;position:relative;
+  box-shadow:0 24px 60px rgba(0,0,0,.7)}
+.modal-close{position:absolute;top:14px;right:14px;width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface);border:1px solid var(--border);border-radius:50%;
+  font-size:15px;color:var(--sub);cursor:pointer;line-height:1;
+  transition:color .15s,border-color .15s}
+.modal-close:hover{color:var(--text);border-color:var(--border-hi)}
+.modal-box h2{font-size:22px;font-weight:800;margin:0 0 8px;letter-spacing:-.03em;color:var(--text)}
+.modal-box p{color:var(--sub);font-size:14px;margin:0;line-height:1.65}
+
+/* ── 역 검색 드롭다운 ── */
+.sug-hint{padding:9px 12px 4px;font-size:11px;font-weight:600;color:var(--sub);
+  letter-spacing:.04em;pointer-events:none;text-transform:uppercase}
+.sug-section{padding:8px 11px 3px;font-size:10px;font-weight:700;color:var(--sub);
+  letter-spacing:.07em;text-transform:uppercase;pointer-events:none}
+.sug-section+.sug-section{border-top:1px solid var(--border);margin-top:4px;padding-top:10px}
+.sug-line-grid{padding:4px 8px 8px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.sug-line-grid.wide{grid-template-columns:repeat(2,1fr)}
+.sug-line-btn{display:flex;align-items:center;gap:7px;padding:9px 9px;width:100%;
+  background:var(--surface);border:1px solid var(--border);border-radius:9px;
+  font:inherit;cursor:pointer;transition:border-color .15s,background .15s;text-align:left}
+.sug-line-btn:hover{border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.04)}
+.sug-line-btn .sug-badge{width:22px;height:22px;border-radius:5px;font-size:11px;
+  padding:0;flex:none;justify-content:center}
+.sug-line-btn-name{font-size:12px;color:var(--sub);line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sug-back{display:flex;align-items:center;gap:7px;width:100%;padding:9px 12px;
+  background:none;border:0;border-bottom:1px solid var(--border);font:inherit;
+  font-size:13px;color:var(--sub);cursor:pointer;font-weight:700}
+.sug-back:hover{color:var(--text)}
+.sug-back .sug-badge{width:20px;height:20px;border-radius:4px;font-size:10px;padding:0;flex:none}
+.sug-no-result{padding:12px 14px;font-size:13px;color:var(--sub);pointer-events:none}
 
 /* ── brand ── */
 .brand-line{font-size:clamp(40px,10vw,72px);font-weight:900;letter-spacing:-.04em;
@@ -299,11 +330,11 @@ footer p{margin:0 0 3px}
 
   <!-- 히어로 -->
   <div class="hero">
-    <p class="brand-line">그래서 어디서 만남?</p>
     <div class="live-badge" id="liveBadge" hidden>
       <span class="live-dot"></span>
-      서울 32개 지역 실시간 혼잡도 연결됨
+      서울 32개 지역 현황 연결됨
     </div>
+    <p class="brand-line">그어만</p>
     <h1 id="headline"></h1>
     <p id="subline"></p>
   </div>
@@ -324,7 +355,7 @@ footer p{margin:0 0 3px}
     </fieldset>
 
     <button type="button" class="opts-toggle open" id="optsToggle" aria-expanded="true" aria-controls="optsPanel">
-      <span>뭐 할지·예산 설정하기</span>
+      <span>뭐 할지 · 예산 · 나잇대 (선택)</span>
       <svg class="opts-chevron" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M1 1l6 5 6-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -352,30 +383,30 @@ footer p{margin:0 0 3px}
 
   <!-- 이렇게 동작해요 -->
   <section class="how-section">
-    <h2>이렇게 동작해요</h2>
-    <p class="how-intro">1~3단계는 지금 써볼 수 있고, 코스 추천은 정식판에서 제공할 예정이에요.</p>
+    <h2>조건만 넣으면 장소를 골라드려요</h2>
+    <p class="how-intro">1~3단계는 지금 써볼 수 있어요. 코스 추천은 베타에서 제공할 예정이에요.</p>
     <ol class="how-steps">
       <li class="how-step">
         <span class="step-num">01</span>
         <div class="step-body">
-          <div class="step-title">출발역과 약속 시간을 넣어요</div>
-          <div class="step-desc">수도권 전철역 어디서 출발해도 돼요. 지금, 평일 저녁, 주말 낮·저녁 중 하나를 골라요.</div>
+          <div class="step-title">출발역, 약속 시간, 조건을 넣어요</div>
+          <div class="step-desc">각자 출발역과 만날 시간대를 넣어요. 뭐 할지, 예산, 나잇대까지 넣으면 더 잘 맞는 곳을 골라드려요.</div>
         </div>
         <span class="step-badge on">지금 써볼 수 있어요</span>
       </li>
       <li class="how-step">
         <span class="step-num">02</span>
         <div class="step-body">
-          <div class="step-title">이동 시간과 그 시간대 혼잡도로 지역을 비교해요</div>
-          <div class="step-desc">"지금" 선택 시 서울시 실시간 혼잡도를 반영해요. 다른 시간은 평소 패턴으로 추정해요.</div>
+          <div class="step-title">모두 오기 편한 수도권 지역 3곳을 골라드려요</div>
+          <div class="step-desc">이동 시간이 엇비슷하고, 그 시간대에 덜 붐비는 지역을 추려서 보여드려요.</div>
         </div>
         <span class="step-badge on">지금 써볼 수 있어요</span>
       </li>
       <li class="how-step">
         <span class="step-num">03</span>
         <div class="step-body">
-          <div class="step-title">붐비면 분위기가 비슷한 근처 지역을 제안해요</div>
-          <div class="step-desc">추천 지역의 혼잡도가 높으면 근처의 덜 붐비는 지역을 함께 보여드려요.</div>
+          <div class="step-title">붐비면 근처 대안도 함께 알려드려요</div>
+          <div class="step-desc">추천 지역이 붐빌 것 같으면 분위기가 비슷하고 덜 붐비는 근처 지역을 같이 보여드려요.</div>
         </div>
         <span class="step-badge on">지금 써볼 수 있어요</span>
       </li>
@@ -383,18 +414,18 @@ footer p{margin:0 0 3px}
         <span class="step-num">04</span>
         <div class="step-body">
           <div class="step-title">카페, 식당, 이동 순서까지 코스로 묶어드려요</div>
-          <div class="step-desc">지역만 알려주는 게 아니라 당일 동선 전체를 하나의 코스로 제안해요.</div>
+          <div class="step-desc">어디서 만날지 정하는 데서 끝나지 않아요. 당일 동선 전체를 하나의 코스로 제안할 예정이에요.</div>
         </div>
-        <span class="step-badge off">정식판에서 제공</span>
+        <span class="step-badge off">베타에서 제공</span>
       </li>
     </ol>
   </section>
 
   <!-- 정식판 미리보기 -->
   <section class="preview-section">
-    <div class="preview-notice">예시 화면이에요. 실제 추천은 베타에서 제공할 예정이에요.</div>
-    <h2>정식판에서는 코스까지 알려드려요</h2>
-    <p class="preview-sub">지역 추천에서 끝나지 않고, 당일 카페·식당·이동 순서를 코스로 묶어드려요.</p>
+    <div class="preview-notice">예시 화면이에요. 코스 추천은 베타에서 제공할 예정이에요.</div>
+    <h2>베타에서는 코스까지 정해드려요</h2>
+    <p class="preview-sub">어디서 만날지만 알려주는 게 아니에요. 카페, 식당, 이동 순서까지 당일 코스로 묶어드릴 예정이에요.</p>
     <div class="preview-tag">정식판 미리보기</div>
     <div class="tl-card">
       <div class="tl-stop">
@@ -454,34 +485,12 @@ footer p{margin:0 0 3px}
     </div>
   </section>
 
-  <!-- 비교표 -->
-  <section class="compare">
-    <h2>중간 지점만 보면 놓치는 것</h2>
-    <p class="compare-sub">가운데 지점이 모두에게 공평한 곳은 아니고, 약속 시간에 얼마나 붐빌지도 따로 찾아봐야 해요.</p>
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th>지도에서<br>가운데 찍기</th>
-          <th>중간 지점만<br>찾을 때</th>
-          <th>그어만</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>모두의 이동 시간 비교</td><td>×</td><td>○</td><td>○</td></tr>
-        <tr><td>얼마나 붐비는지</td><td>×</td><td>×</td><td>○</td></tr>
-        <tr><td>붐비면 근처 대안 제안</td><td>×</td><td>×</td><td>○</td></tr>
-        <tr><td>카페, 식당, 동선까지 코스로 추천</td><td>×</td><td>×</td><td class="td-beta">정식판</td></tr>
-      </tbody>
-    </table>
-  </section>
-
   <!-- 베타 신청 -->
   <section class="signup-wrap" id="signup">
     <div class="signup">
       <p class="signup-eyebrow">얼리 액세스</p>
       <h2>코스 추천 베타를<br>가장 먼저 써보세요</h2>
-      <p class="signup-tagline">신청하면 베타를 먼저 써볼 수 있고, 자주 만나는 지역을 먼저 추가해 드려요. 지금은 서울 32개 지역을 추천하는 시험판이에요.</p>
+      <p class="signup-tagline">신청하면 코스 추천 베타를 먼저 써볼 수 있고, 자주 만나는 지역을 먼저 추가해 드려요. 지금은 서울 32개 지역과 수도권 번화가 72곳을 추천하는 시험판이에요.</p>
       <label class="field-label" for="submit-email">이메일</label>
       <input id="submit-email" type="email" autocomplete="email" placeholder="you@example.com">
       <label class="consent">
@@ -490,8 +499,8 @@ footer p{margin:0 0 3px}
       </label>
       <label class="field-label" for="submit-area">자주 만나는 지역 (선택)</label>
       <input id="submit-area" type="text" class="plain" maxlength="40" placeholder="예: 성수, 사당">
-      <label class="field-label" for="submit-advice" style="margin-top:14px">최근 약속 장소 정할 때 뭐가 제일 힘들었나요? (선택)</label>
-      <textarea id="submit-advice" maxlength="240" placeholder="예: 다들 사는 곳이 달라서 한참 못 정했어요"></textarea>
+      <label class="field-label" for="submit-advice" style="margin-top:14px">약속 장소 정할 때 뭐가 제일 귀찮았나요? (선택)</label>
+      <textarea id="submit-advice" maxlength="240" placeholder="예: 각자 사는 곳이 달라서 어디서 만날지 한참 고민했어요"></textarea>
       <p class="error" id="formError" role="alert"></p>
       <button class="btn-submit" id="submit" type="button">베타 초대 받기</button>
     </div>
@@ -499,14 +508,14 @@ footer p{margin:0 0 3px}
 
 </main>
 
-<footer class="wrap">
-  <p>연세대학교 SW·AI비즈니스응용설계 수업에서 수요를 검증하려고 만든 페이지입니다.</p>
-  <p>수집 항목: 쿠키 기반 임의 식별값, 일부를 가린 IP, 유입 경로, 기기 종류, 방문 시각, 페이지 내 이용 기록, 선택한 나이대, 입력한 이메일과 의견. 통계는 수업 발표에 쓰이며, 공개 시트에는 이메일과 IP를 가려서 기록합니다.</p>
-</footer>
+<footer class="wrap"></footer>
 
-<div id="popup" style="display:none;">
-  <h1>신청됐어요</h1>
-  <p>확인 메일을 보내드렸어요. 베타가 열리면 가장 먼저 알려드릴게요.</p>
+<div id="modal-overlay" class="modal-overlay" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true">
+    <button class="modal-close" id="modal-close" type="button" aria-label="닫기">✕</button>
+    <h2>신청됐어요 🎉</h2>
+    <p>베타가 열리면 가장 먼저 알려드릴게요.<br>곧 만나요!</p>
+  </div>
 </div>
 
 <script>
@@ -552,14 +561,14 @@ function track(event, detail){
 
 /* A/B: 헤드라인 원문 유지, 서브는 공통 */
 var COPY = {
-  A: { h:'가보니 줄이 30미터. 또 딴 데 가야 했죠?' },
-  B: { h:'나만 50분 걸리는 약속 장소, 이번에도 수락했죠?' }
+  A: { h:'그래서 어디서 만남?' },
+  B: { h:'그래서 어디서 만남?' }
 };
 var variant = urlParams.get('ab') || getCookieValue('ab');
 if (variant !== 'A' && variant !== 'B') variant = Math.random() < .5 ? 'A' : 'B';
 setCookieValue('ab', variant, 180);
 document.getElementById('headline').textContent = COPY[variant].h;
-document.getElementById('subline').textContent = '수도권 어디서 출발해도 돼요. 출발역과 약속 시간만 넣으면, 서울에서 그때 덜 붐비고 모두 오기 편한 곳을 골라드려요.';
+document.getElementById('subline').textContent = '출발역이랑 조건만 넣으면, 다 같이 오기 편한 수도권 지역 3곳을 바로 골라드려요.';
 
 /* 방문 기록 */
 (function(){
@@ -693,6 +702,11 @@ var AREAS = [
  {name:'영등포 타임스퀘어',label:'영등포',st:'영등포',base:3,p:2,v:'shop food',ag:1,alt:['여의도']},
  {name:'신림역',label:'신림',st:'신림',base:3,p:1,v:'food drink',ag:2,alt:['사당역']}
 ];
+/* 수도권 번화가: 실시간 혼잡도가 없어 이동 시간 위주로 추천한다 */
+[['수원역','수원'],['인계동','수원시청'],['영통','영통'],['망포','망포'],['성균관대','성균관대'],['광교','광교중앙'],['동탄','동탄'],['병점','병점'],['오산','오산'],['평택','평택'],['평택지제','지제'],['천안','천안'],['두정','두정'],['아산','아산'],['온양온천','온양온천'],['판교','판교'],['정자','정자'],['서현','서현'],['수내','수내'],['미금','미금'],['죽전','죽전'],['기흥','기흥'],['야탑','야탑'],['모란','모란'],['안양','안양'],['범계','범계'],['평촌','평촌'],['인덕원','인덕원'],['금정','금정'],['산본','산본'],['광명사거리','광명사거리'],['철산','철산'],['안산 중앙','중앙'],['한양대 에리카','한대앞'],['시흥대야','시흥대야'],['월곶','월곶'],['소래포구','소래포구'],['부천','부천'],['상동','상동'],['부평','부평'],['구월동','인천시청'],['주안','주안'],['인천','인천'],['동인천','동인천'],['계양','계양'],['송도','센트럴파크'],['인천대입구','인천대입구'],['청라','청라국제도시'],['검단','검단사거리'],['김포 구래','구래'],['의정부','의정부'],['회룡','회룡'],['일산 라페스타','정발산'],['주엽','주엽'],['마두','마두'],['백석','백석'],['화정','화정'],['행신','행신'],['대곡','대곡'],['운정','운정'],['금촌','금촌'],['구리','구리'],['다산','도농'],['별내','별내'],['미사','미사'],['하남풍산','하남풍산'],['경기광주','경기광주'],['이천','이천'],['춘천','춘천'],['남춘천','남춘천'],['가평','가평'],['양평','양평']].forEach(function(m){
+  AREAS.push({name:m[0]+' (수도권)',label:m[0],st:m[1],metro:true,base:2,p:2,v:'food cafe drink shop date',ag:0,alt:[]});
+});
+
 var byName = {}; AREAS.forEach(function(a){ byName[a.name]=a; });
 
 var LEVEL = { 1:{t:'여유',c:'var(--lv1)'}, 2:{t:'보통',c:'var(--lv2)'}, 3:{t:'약간 붐빔',c:'var(--lv3)'}, 4:{t:'붐빔',c:'var(--lv4)'} };
@@ -729,7 +743,7 @@ function recommend(q){
     var mins = trips.map(function(t){ return t.min; });
     var max = Math.max.apply(null,mins), avg = mins.reduce(function(x,y){return x+y;},0)/mins.length;
     var liveRow = (q.when==='now' && live.ok) ? live.areas[a.name] : null;
-    var lv = liveRow && LV_NUM[liveRow.level] ? LV_NUM[liveRow.level] : estLevel(a,q.when);
+    var lv = a.metro ? 2 : liveRow && LV_NUM[liveRow.level] ? LV_NUM[liveRow.level] : estLevel(a,q.when);
     var fits = q.vibe==='any' || a.v.indexOf(q.vibe)>-1;
     /* p: 지역 가격대(1~3). 5만원 이하는 비싼 지역을 낮추고, 10~20만원은 가격대가 높은 지역을 조금 올린다 */
     var budgetCost = q.budget==='b1' ? Math.max(0,a.p-2)*18 : q.budget==='b3' ? (3-a.p)*4 : 0;
@@ -753,7 +767,8 @@ function whyText(r, n){
   if (n===1) parts.push('모두 '+r.min+'~'+r.max+'분이면 와요');
   else if (gap<=8) parts.push('이동 시간 차이가 '+gap+'분뿐이에요');
   else parts.push('가장 먼 사람도 '+r.max+'분이면 와요');
-  if (r.lv<=2) parts.push(r.isLive?'지금 '+LEVEL[r.lv].t+' 상태예요':'이 시간대엔 크게 붐비지 않는 편이에요');
+  if (r.a.metro) parts.push('이동 시간을 기준으로 골랐어요');
+  else if (r.lv<=2) parts.push(r.isLive?'지금 '+LEVEL[r.lv].t+' 상태예요':'이 시간대엔 크게 붐비지 않는 편이에요');
   else parts.push(r.isLive?'지금 '+LEVEL[r.lv].t+' 상태지만 이동이 편해요':'이 시간대엔 붐비는 편이지만 이동이 편해요');
   return parts.join('. ')+'.';
 }
@@ -777,51 +792,114 @@ function addPerson(val){
   inp.className='st'; inp.type='text'; inp.value=val; inp.autocomplete='off'; inp.placeholder='역 이름 입력';
   inp.setAttribute('aria-label',(i+1)+'번째 사람 출발역');
   var list = el('ul','sug'); list.hidden=true;
+  var selectedLine=null;
+  var MAIN_LINES=['1호선','2호선','3호선','4호선','5호선','6호선','7호선','8호선','9호선'];
   function makeBadge(line){
     var b=document.createElement('span'); b.className='sug-badge';
     b.textContent=LINE_SHORT[line]||line.charAt(0);
     b.style.background=LINE_COLORS[line]||'#555';
     return b;
   }
+  function pick(st){
+    inp.value=st; inp.classList.remove('bad');
+    document.getElementById('finderError').textContent='';
+    list.hidden=true; selectedLine=null;
+  }
+  function stBtn(st){
+    var li=document.createElement('li'); li.className='sug-st';
+    var b=document.createElement('button'); b.type='button'; b.textContent=st+'역';
+    b.onmousedown=function(e){e.preventDefault();};
+    b.onclick=function(){pick(st);}; li.appendChild(b); return li;
+  }
+  function sectionLbl(txt){
+    var li=document.createElement('li'); li.className='sug-section'; li.textContent=txt; return li;
+  }
+  function lineGrid(lines, extraCls){
+    var grid=document.createElement('li');
+    grid.className='sug-line-grid'+(extraCls?' '+extraCls:'');
+    lines.forEach(function(line){
+      if(!EDGES[line]) return;
+      var btn=document.createElement('button'); btn.type='button'; btn.className='sug-line-btn';
+      var bdg=makeBadge(line); btn.appendChild(bdg);
+      var nm=document.createElement('span'); nm.className='sug-line-btn-name'; nm.textContent=line;
+      btn.appendChild(nm);
+      btn.onmousedown=function(e){e.preventDefault();};
+      btn.onclick=function(){selectedLine=line; draw();};
+      grid.appendChild(btn);
+    });
+    return grid;
+  }
   function draw(){
     var q=inp.value.trim().replace(/역$/,'');
     list.innerHTML='';
-    if(!q){
-      LINE_ORDER.forEach(function(line){
-        var sts=getLineStations(line); if(!sts.length) return;
-        var hdr=document.createElement('li'); hdr.className='sug-line-hdr';
-        hdr.appendChild(makeBadge(line));
-        var nm=document.createElement('span'); nm.textContent=line; hdr.appendChild(nm);
-        list.appendChild(hdr);
-        sts.forEach(function(st){
-          var li=document.createElement('li'); li.className='sug-st';
-          var b=document.createElement('button'); b.type='button';
-          b.textContent=st+'역';
-          b.onmousedown=function(e){ e.preventDefault(); };
-          b.onclick=function(){ inp.value=st; inp.classList.remove('bad'); list.hidden=true; };
-          li.appendChild(b); list.appendChild(li);
-        });
-      });
+
+    /* ① 빈 입력 → 호선 그리드 (서울 3열 / 광역·기타 2열) */
+    if(!q && !selectedLine){
+      list.appendChild(sectionLbl('서울 지하철'));
+      list.appendChild(lineGrid(MAIN_LINES,''));
+      var otherLines=LINE_ORDER.filter(function(l){return EDGES[l]&&MAIN_LINES.indexOf(l)<0;});
+      list.appendChild(sectionLbl('광역·기타'));
+      list.appendChild(lineGrid(otherLines,'wide'));
       list.hidden=false; return;
     }
-    var hits=stationNames.filter(function(n){ return n.indexOf(q)>-1 && n!==q; })
-      .sort(function(a,b){ var ai=a.indexOf(q),bi=b.indexOf(q); return ai!==bi?ai-bi:a.length-b.length; })
+
+    /* ② 호선 선택됨 → 해당 역 목록 */
+    if(!q && selectedLine){
+      var back=document.createElement('li');
+      var bb=document.createElement('button'); bb.type='button'; bb.className='sug-back';
+      bb.appendChild(document.createTextNode('← '));
+      bb.appendChild(makeBadge(selectedLine));
+      bb.appendChild(document.createTextNode(' '+selectedLine));
+      bb.onmousedown=function(e){e.preventDefault();};
+      bb.onclick=function(){selectedLine=null; draw();};
+      back.appendChild(bb); list.appendChild(back);
+      getLineStations(selectedLine).forEach(function(st){ list.appendChild(stBtn(st)); });
+      list.hidden=false; return;
+    }
+
+    /* ③ 타이핑 → 호선명 + 역명 동시 검색 */
+    selectedLine=null;
+    var lineHits=LINE_ORDER.filter(function(line){
+      if(!EDGES[line]) return false;
+      return line.indexOf(q)>-1||(LINE_SHORT[line]||'')===q;
+    });
+    lineHits.slice(0,2).forEach(function(line){
+      var hdr=document.createElement('li'); hdr.className='sug-line-hdr';
+      hdr.appendChild(makeBadge(line));
+      var nm=document.createElement('span'); nm.textContent=line; hdr.appendChild(nm);
+      list.appendChild(hdr);
+      getLineStations(line).forEach(function(st){ list.appendChild(stBtn(st)); });
+    });
+    var stHits=stationNames
+      .filter(function(n){ return n.indexOf(q)>-1; })
+      .sort(function(a,b){ return a.indexOf(q)-b.indexOf(q)||a.length-b.length; })
       .slice(0,8);
-    hits.forEach(function(n){
+    if(stHits.length&&lineHits.length){
+      var sep=document.createElement('li'); sep.className='sug-line-hdr';
+      sep.appendChild(document.createTextNode('역 이름')); list.appendChild(sep);
+    }
+    stHits.forEach(function(n){
       var li=document.createElement('li');
       var b=document.createElement('button'); b.type='button';
-      var txt=document.createTextNode(n+'역 '); b.appendChild(txt);
-      (stations[n]||[]).slice(0,3).forEach(function(line){ b.appendChild(makeBadge(line)); });
-      b.onmousedown=function(e){ e.preventDefault(); };
-      b.onclick=function(){ inp.value=n; inp.classList.remove('bad'); list.hidden=true; };
-      li.appendChild(b); list.appendChild(li);
+      b.appendChild(document.createTextNode(n+'역'));
+      var bgs=document.createElement('span');
+      bgs.style.cssText='display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle';
+      (stations[n]||[]).slice(0,3).forEach(function(line){ bgs.appendChild(makeBadge(line)); });
+      b.appendChild(bgs);
+      b.onmousedown=function(e){e.preventDefault();};
+      b.onclick=function(){pick(n);}; li.appendChild(b); list.appendChild(li);
     });
-    list.hidden=hits.length===0;
+    if(!lineHits.length&&!stHits.length){
+      var no=document.createElement('li'); no.className='sug-no-result';
+      no.textContent='"'+q+'" 결과가 없어요. 다시 입력해 보세요.';
+      list.appendChild(no);
+    }
+    list.hidden=false;
   }
   var hideTimer;
   inp.oninput=function(){ clearTimeout(hideTimer); inp.classList.remove('bad'); document.getElementById('finderError').textContent=''; draw(); };
   inp.onfocus=function(){ inp.select(); clearTimeout(hideTimer); draw(); };
-  inp.onblur=function(){ hideTimer=setTimeout(function(){ list.hidden=true; },120); };
+  inp.onblur=function(){ hideTimer=setTimeout(function(){ list.hidden=true; selectedLine=null; },120); };
   wrap.appendChild(inp); wrap.appendChild(list);
   row.appendChild(dot); row.appendChild(wrap);
   var rm = el('button','rm','×'); rm.type='button'; rm.setAttribute('aria-label','삭제');
@@ -879,10 +957,17 @@ function renderPick(r, i, n, longest){
 
   /* 혼잡도 + 출처 표시 */
   var meta = el('div');
-  var pill = el('span','lvl',LEVEL[r.lv].t); pill.style.background=LEVEL[r.lv].c;
+  var pill;
+  if (r.a.metro) {
+    pill = el('span','lvl','혼잡 정보 없음'); pill.style.background='var(--sub)';
+  } else {
+    pill = el('span','lvl',LEVEL[r.lv].t); pill.style.background=LEVEL[r.lv].c;
+  }
   meta.appendChild(pill);
   var srcText;
-  if (q_current.when === 'now') {
+  if (r.a.metro) {
+    srcText = '수도권 번화가 · 이동 시간 기준';
+  } else if (q_current.when === 'now') {
     srcText = r.isLive
       ? '지금 실시간'+(r.liveRow&&r.liveRow.max?' · 약 '+Number(r.liveRow.min).toLocaleString()+'~'+Number(r.liveRow.max).toLocaleString()+'명':'')
       : '지금 (평소 패턴 추정)';
@@ -976,7 +1061,7 @@ function run(ev){
     out.appendChild(note);
 
     var first = results.picks[0], near = results.nearest;
-    if (near.a.st!==first.a.st && near.lv>first.lv){
+    if (near.a.st!==first.a.st && near.lv>first.lv && !near.a.metro){
       var diff = first.max-near.max;
       out.appendChild(el('p','versus','이동 시간만 보면 '+near.a.label+'인데, '+LEVEL[near.lv].t+'이라 '+first.a.label+'을 먼저 골랐어요. '+(diff>0?'가장 먼 사람 기준 '+diff+'분 차이예요.':'이동 시간은 비슷해요.')));
     }
@@ -1030,6 +1115,11 @@ function run(ev){
   });
 }
 document.getElementById('finder').addEventListener('submit',run);
+(function(){
+  var overlay=document.getElementById('modal-overlay');
+  document.getElementById('modal-close').addEventListener('click',function(){overlay.hidden=true;});
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.hidden=true;});
+})();
 
 /* 이메일 제출 */
 document.getElementById('submit').addEventListener('click',function(){
@@ -1051,8 +1141,7 @@ document.getElementById('submit').addEventListener('click',function(){
     document.getElementById('submit-email').value='';
     document.getElementById('submit-advice').value='';
     document.getElementById('submit-area').value='';
-    if (window.$ && $.fn.simplePopup) $.fn.simplePopup({type:'html',htmlSelector:'#popup'});
-    else err.textContent='신청됐어요. 확인 메일을 보내드렸어요.';
+    document.getElementById('modal-overlay').hidden=false;
   }).catch(function(){ done(); err.textContent='저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.'; });
 });
 </script>
